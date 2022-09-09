@@ -1,10 +1,10 @@
 mod cn;
-mod models;
 mod repo;
+mod models;
+
+use cn::_instance;
 use std::time::Instant;
 use repo::mongo_repo::Mongo;
-use cn::_instance;
-
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
