@@ -1,99 +1,50 @@
-use std::{collections::HashMap, fs};
-use crate::{repo::mongo_repo::Mongo, models::cn_model};
-use futures::TryStreamExt;
-use regex::Regex;
-
-#[derive(Debug, Clone)]
-pub struct Helper { // Helper function
-    pub _norm_id: String,
-    pub _device_category: String,
-    pub _internal_regex_objects: Vec<Regex>
-}
+use std::collections::HashMap;
+use json::{JsonValue, object};
 
 #[derive(Debug)]
 pub struct Normalizer { // Matches the regex objects and returns the match
-    pub active_normalizers: HashMap<String, Helper>,
-    pub regex_objects: Vec<(Regex, String)>,
     pub taxonomy_map: HashMap<String, HashMap<String, String>>,
-    pub type_map: HashMap<String, HashMap<String, String>>,
-    pub log_type: HashMap<String, String>,
-    pub regex: Regex
+    pub type_map: HashMap<String, HashMap<String, String>>
 }
 
-impl Normalizer {
-    pub fn _update_normalizer (&mut self, id: String, normalizer: &cn_model::Normalizer) {
-        if normalizer.active == true {
-            self.regex_objects.retain(|x| x.1 != id);
-            self.regex_objects.push((Regex::new(&normalizer.regex).unwrap(), id.clone()));
-            self.type_map.entry(id.clone()).and_modify(|x| {*x = normalizer.type_mapping.clone()}).or_insert(normalizer.type_mapping.clone());
-            self.taxonomy_map.entry(id.clone()).and_modify(|x| {*x = normalizer.taxonomy_mapping.clone()}).or_insert(normalizer.taxonomy_mapping.clone());
-            let helper = Helper {
-                _norm_id: normalizer.norm_id.clone(),
-                _device_category: normalizer.category.clone(),
-                _internal_regex_objects: normalizer.internal_regex.clone().into_iter().map(|x|Regex::new(&x).unwrap()).collect:: <Vec<Regex>>()
-            };
-            self.active_normalizers.entry(id.clone()).and_modify(|x| {*x = helper}).or_insert(Helper {
-                _norm_id: normalizer.norm_id.clone(),
-                _device_category: normalizer.category.clone(),
-                _internal_regex_objects: normalizer.internal_regex.clone().into_iter().map(|x|Regex::new(&x).unwrap()).collect:: <Vec<Regex>>()
-            });
-            self.log_type.entry(id.clone()).and_modify(|x| *x = normalizer.log_type.clone()).or_insert(normalizer.log_type.clone());
+impl Normalizer { 
+
+    fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
+        let mut typemapper = json::object! {};
+        for (field, _value) in taxonomized_log.entries() {
+            if type_mapping.contains_key(field) {
+                let data_type = &type_mapping[field];
+                if typemapper.has_key(&data_type) {
+                    let _ = typemapper[data_type].push(field);
+                }
+                else {
+                    typemapper[data_type] = json::array![field];
+                }
+            }
         }
-        else if normalizer.active == false {
-            self.regex_objects.retain(|x| x.1 != id);
-            self.type_map.remove(&id);
-            self.taxonomy_map.remove(&id);
-            self.active_normalizers.remove(&id);
-            self.log_type.remove(&id);
+        for (key, value) in typemapper.entries() {
+            taxonomized_log[key] = value.clone();
         }
     }
 
-    fn _csv_to_hashmap (&self, path_of_file: &str) -> HashMap<String, String> { // Csv to hashmap <String, String>
-        let mut new_hashmap: HashMap<String, String> = HashMap::new();
-        let read_file = fs::read_to_string(path_of_file).unwrap();
-        for lines in read_file.clone().split_terminator("\n") {
-            let pair = lines.split(",").collect:: <Vec<&str>> ();
-            new_hashmap.insert(pair[0].to_string(), pair[1].to_string());
-        };
-        new_hashmap
+    fn _add_taxonomy(&self, taxonomy_mapping: &HashMap<String, String>, parsed_log: JsonValue) -> JsonValue {
+        let mut normalized_log = object! {};
+        for (key, value) in parsed_log.entries() {
+            let mut taxonomy = key.to_lowercase();
+            if taxonomy_mapping.contains_key(&taxonomy) {
+                taxonomy = taxonomy_mapping[&taxonomy].clone();
+            }
+            normalized_log[taxonomy] = value.to_owned();
+        }
+        normalized_log
     }
 
-}
+    pub fn normalize(&self, str_log: JsonValue, id: String) -> JsonValue {
+        let tax_map = &self.taxonomy_map[&id];
+        let type_map = &self.type_map[&id];
+        let mut taxonomized_log = self._add_taxonomy(tax_map, str_log); 
+        self._add_type(&mut taxonomized_log, type_map);
+        taxonomized_log
+    }
 
-pub async fn init(db: Mongo) -> Normalizer {
-
-    let mut cursor = db.get_active_normalizers_cursor().await.unwrap();
-
-    let mut active_normalizers: HashMap<String, Helper> = HashMap::new();
-    let mut regex_objects: Vec<(Regex, String)> = Vec::new();
-    let mut taxonomy_map: HashMap<String, HashMap<String, String>> = HashMap::new();
-    let mut type_map: HashMap<String, HashMap<String, String>> = HashMap::new();
-    let mut log_type: HashMap<String, String> = HashMap::new();
-    
-    while let Some(normalizer) = cursor
-        .try_next()
-        .await
-        .ok()
-        .expect("Error blah.. blah.. blah..")
-    {
-        let id = normalizer.id.unwrap().to_string();
-        regex_objects.push((Regex::new(&normalizer.regex).unwrap(), id.clone()));
-        type_map.insert(id.clone(), normalizer.type_mapping);
-        taxonomy_map.insert(id.clone(), normalizer.taxonomy_mapping);
-        active_normalizers.insert(id.clone(), Helper {
-            _norm_id: normalizer.norm_id,
-            _device_category: normalizer.category,
-            _internal_regex_objects: normalizer.internal_regex.into_iter().map(|x|Regex::new(&x).unwrap()).collect:: <Vec<Regex>>()
-        });
-        log_type.insert(id.clone(), normalizer.log_type);
-    };
-    let normalizer = Normalizer {
-        active_normalizers,
-        regex_objects,
-        taxonomy_map,
-        type_map,
-        log_type,
-        regex: Regex::new("\\{.*\\}").unwrap()
-    };
-    return normalizer
 }
