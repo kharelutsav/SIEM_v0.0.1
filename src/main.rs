@@ -21,10 +21,10 @@ async fn main() -> std::io::Result<()> {
         while let Some(raw_log) = raw_logs
             .next()
             {
-                if let Some(id) = _processor.match_log(&raw_log) {
-                    let str_log = _parser.parse_log(&id, &raw_log);
-                    let mut _normalized_log = _normalizer.normalize(str_log, &id);
-                    _processor._post_process(&id, raw_log, &mut _normalized_log);
+                if let Some(id) = _processor.pre_process(&raw_log) {
+                    let mut str_log = _parser.parse(&id, &raw_log);
+                    _processor.post_process(&id, raw_log, &mut str_log);
+                    let _normalized_log = _normalizer.normalize(str_log, &id);
                 };
             }
         }

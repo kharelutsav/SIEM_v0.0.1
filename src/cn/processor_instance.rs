@@ -23,7 +23,7 @@ impl Processor {
         };
     }
 
-    pub fn _post_process(&self, id: &String, log: &str, str_log: &mut JsonValue) {
+    pub fn post_process(&self, id: &String, log: &str, str_log: &mut JsonValue) {
         let _internal_regex = &self.internal_regex_objects[id];
         if !_internal_regex.is_empty() {
             for regex in _internal_regex {
@@ -34,7 +34,7 @@ impl Processor {
         }
     }
 
-    pub fn match_log(&self, log: &str) -> Option<String> {
+    pub fn pre_process(&self, log: &str) -> Option<String> {
         for (id, regex) in &self.regex_objects {
             if regex.is_match(log) {
                 return Some(id.to_owned());

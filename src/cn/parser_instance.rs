@@ -11,17 +11,7 @@ pub struct Parser {
 
 impl Parser {
 
-    fn _capture_regex_match (&self, obj: &mut JsonValue, id: &str, log: &str) {
-        let regex = &self.regex_objects[id];
-        let header = regex.captures(log).unwrap();
-        for name in regex.capture_names() {
-            if !name.is_none() {
-                obj.insert(name.unwrap(), header[name.unwrap()].to_string()).unwrap();
-            }
-        };
-    }
-
-    pub fn parse_log(&self, id: &str, log: &str) -> JsonValue {
+    pub fn parse(&self, id: &str, log: &str) -> JsonValue {
         let mut str_log = object! {};
         match self.log_type[id].as_str() {
             "JSON" => {
@@ -35,6 +25,16 @@ impl Parser {
             _ => todo!()
         }
         str_log
+    }
+
+    fn _capture_regex_match (&self, obj: &mut JsonValue, id: &str, log: &str) {
+        let regex = &self.regex_objects[id];
+        let header = regex.captures(log).unwrap();
+        for name in regex.capture_names() {
+            if !name.is_none() {
+                obj.insert(name.unwrap(), header[name.unwrap()].to_string()).unwrap();
+            }
+        };
     }
  
     fn _json_parser (&self, raw_log: &JsonValue, str_log: &mut JsonValue, key_: &str) {
