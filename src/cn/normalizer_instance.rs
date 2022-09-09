@@ -39,9 +39,9 @@ impl Normalizer {
         normalized_log
     }
 
-    pub fn normalize(&self, str_log: JsonValue, id: String) -> JsonValue {
-        let tax_map = &self.taxonomy_map[&id];
-        let type_map = &self.type_map[&id];
+    pub fn normalize(&self, str_log: JsonValue, id: &str) -> JsonValue {
+        let tax_map = &self.taxonomy_map[id];
+        let type_map = &self.type_map[id];
         let mut taxonomized_log = self._add_taxonomy(tax_map, str_log); 
         self._add_type(&mut taxonomized_log, type_map);
         taxonomized_log

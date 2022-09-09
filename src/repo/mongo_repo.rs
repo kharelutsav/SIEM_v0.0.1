@@ -23,7 +23,6 @@ impl Mongo {
             Ok(v) => v.to_string(),
             Err(err) => format!("Error loading env variable, {}", err)
         };
-        println!("{}", uri);
         let client = Client::with_uri_str(uri).await.unwrap();
         let db = client.database("normalizers");
         let col: Collection<Normalizer> = db.collection("Normalizer");

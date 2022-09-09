@@ -23,7 +23,8 @@ async fn main() -> std::io::Result<()> {
             {
                 if let Some(id) = _processor.match_log(&raw_log) {
                     let str_log = _parser.parse_log(&id, &raw_log);
-                    _normalizer.normalize(str_log, id);
+                    let mut _normalized_log = _normalizer.normalize(str_log, &id);
+                    _processor._post_process(&id, raw_log, &mut _normalized_log);
                 };
             }
         }
