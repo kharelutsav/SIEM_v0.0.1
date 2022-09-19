@@ -15,8 +15,11 @@ impl Parser {
         let mut str_log = object! {};
         match self.log_type[id].as_str() {
             "JSON" => {
-                let index = self.regex.find(log).unwrap();
-                self._json_parser(&json::parse(&log[index.start()..index.end()]).unwrap(), &mut str_log, "");
+                // let index = self.regex.find(log).unwrap();
+                // self._json_parser(&json::parse(&log[index.start()..index.end()]).unwrap(), &mut str_log, "");
+                let (_, log) = log.split_once("{").unwrap();
+                let (json_log, _) = log.rsplit_once("}").unwrap();
+                self._json_parser(&json::parse(&format!("{{{json_log}}}")).unwrap(), &mut str_log, "");
             },
             "LEEF" => {
                 self._capture_regex_match(&mut str_log, id, log);
@@ -93,42 +96,42 @@ impl Parser {
             }
     }
 
-    fn _name_value_pair_parser(&self) {
-        // Name Value Pair Format //
-        // Company=ABC Company;Product=SystemDefender;Version=1.13;EventID=console_login;Username=jsmith;Name=John Smith;authType=interactivePassword;
+    // fn _name_value_pair_parser(&self) {
+    //     // Name Value Pair Format //
+    //     // Company=ABC Company;Product=SystemDefender;Version=1.13;EventID=console_login;Username=jsmith;Name=John Smith;authType=interactivePassword;
 
-        let raw_log = "Company=ABC=Company;Product=System;DefenderVersion=1.13;EventID=console_login;Username=jsmith;Name=John Smith;authType=interactivePassword;";
+    //     let raw_log = "Company=ABC=Company;Product=System;DefenderVersion=1.13;EventID=console_login;Username=jsmith;Name=John Smith;authType=interactivePassword;";
     
-        let mut new_map = HashMap::new();
-        let mut list = raw_log.split(";");
+    //     let mut new_map = HashMap::new();
+    //     let mut list = raw_log.split(";");
     
-        while let Some(pair) = list
-            .next()
-            {
-                if pair.is_empty() {
-                    continue;
-                };
-                let mut temp_obj = pair.splitn(2, "=");
-                new_map.insert(temp_obj.next().unwrap(), temp_obj.next().unwrap());
-            }
-    }
+    //     while let Some(pair) = list
+    //         .next()
+    //         {
+    //             if pair.is_empty() {
+    //                 continue;
+    //             };
+    //             let mut temp_obj = pair.splitn(2, "=");
+    //             new_map.insert(temp_obj.next().unwrap(), temp_obj.next().unwrap());
+    //         }
+    // }
 
-    fn _generic_list_parser(&self) {
-        // Generic List Format //
-        // ABC Company;1.13;console_login;jsmith;John Smith;interactivePassword;
+    // fn _generic_list_parser(&self) {
+    //     // Generic List Format //
+    //     // ABC Company;1.13;console_login;jsmith;John Smith;interactivePassword;
 
-        let info = ["vendor", "version", "action", "user_name", "name", "mode"];
-        let raw_log = "ABC Company;1.13;console_login;jsmith;John Smith;interactivePassword;";
+    //     let info = ["vendor", "version", "action", "user_name", "name", "mode"];
+    //     let raw_log = "ABC Company;1.13;console_login;jsmith;John Smith;interactivePassword;";
      
-        let mut new_map = HashMap::new();
-        let mut list = raw_log.split(";");
+    //     let mut new_map = HashMap::new();
+    //     let mut list = raw_log.split(";");
     
-        for field in info {
-            let value = list.next().unwrap();
-            if !value.is_empty() {
-                new_map.insert(field, value);
-            }
-        }
-    }
+    //     for field in info {
+    //         let value = list.next().unwrap();
+    //         if !value.is_empty() {
+    //             new_map.insert(field, value);
+    //         }
+    //     }
+    // }
 
 }

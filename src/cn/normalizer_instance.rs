@@ -8,6 +8,23 @@ pub struct Normalizer { // Matches the regex objects and returns the match
 }
 
 impl Normalizer { 
+    // fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
+    //     let mut typemapper: HashMap<&String, Vec<&str>> = HashMap::new();
+    //     let iter_obj = taxonomized_log.clone();
+    //     for (field, _value) in iter_obj.entries() {
+    //         if let Some(data_type) = type_mapping.get(field) {
+    //             if let Some(value) = typemapper.get_mut(data_type) {
+    //                 value.push(field)
+    //             }
+    //             else {
+    //                 typemapper.insert(data_type, vec![field]);
+    //             }
+    //         }
+    //     }
+    //     for (key, value) in typemapper {
+    //         taxonomized_log[key] = value.join(" ").into();
+    //     }
+    // }
 
     fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
         let mut typemapper = json::object! {};
@@ -31,8 +48,8 @@ impl Normalizer {
         let mut normalized_log = object! {};
         for (key, value) in parsed_log.entries() {
             let mut taxonomy = key.to_lowercase();
-            if taxonomy_mapping.contains_key(&taxonomy) {
-                taxonomy = taxonomy_mapping[&taxonomy].clone();
+            if let Some(replace_str) = taxonomy_mapping.get(&taxonomy) {
+                taxonomy = replace_str.to_string();
             }
             normalized_log[taxonomy] = value.to_owned();
         }
