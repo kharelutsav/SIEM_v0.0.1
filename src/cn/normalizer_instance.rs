@@ -9,11 +9,11 @@ pub struct Normalizer { // Matches the regex objects and returns the match
 
 impl Normalizer { 
     // fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
-    //     let mut typemapper: HashMap<&String, Vec<&str>> = HashMap::new();
-    //     let iter_obj = taxonomized_log.clone();
-    //     for (field, _value) in iter_obj.entries() {
+    //     let mut typemapper: HashMap<&str, Vec<&str>> = HashMap::new();
+    //     let xyz = taxonomized_log.clone();
+    //     for (field, _value) in xyz.entries() {
     //         if let Some(data_type) = type_mapping.get(field) {
-    //             if let Some(value) = typemapper.get_mut(data_type) {
+    //             if let Some(value) = typemapper.get_mut(data_type.as_str()) {
     //                 value.push(field)
     //             }
     //             else {
@@ -22,15 +22,14 @@ impl Normalizer {
     //         }
     //     }
     //     for (key, value) in typemapper {
-    //         taxonomized_log[key] = value.join(" ").into();
+    //         taxonomized_log[key] = value.join(" ").as_str().into();
     //     }
     // }
 
     fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
         let mut typemapper = json::object! {};
         for (field, _value) in taxonomized_log.entries() {
-            if type_mapping.contains_key(field) {
-                let data_type = &type_mapping[field];
+            if let Some(data_type) = type_mapping.get(field) {
                 if typemapper.has_key(&data_type) {
                     let _ = typemapper[data_type].push(field);
                 }
@@ -57,8 +56,8 @@ impl Normalizer {
     }
 
     pub fn normalize(&self, str_log: JsonValue, id: &str) -> JsonValue {
-        let tax_map = &self.taxonomy_map[id];
-        let type_map = &self.type_map[id];
+        let tax_map = self.taxonomy_map.get(id).unwrap();
+        let type_map = self.type_map.get(id).unwrap();
         let mut taxonomized_log = self._add_taxonomy(tax_map, str_log); 
         self._add_type(&mut taxonomized_log, type_map);
         taxonomized_log
