@@ -6,7 +6,6 @@ use cn::_instance;
 use std::time::Instant;
 use repo::mongo_repo::Mongo;
 
-
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let db = Mongo::init().await;

@@ -17,9 +17,3 @@ bson = "2.4.0"
 mongodb = "2.3.0"
 
 # Build in Release Mode. Other optimization techniques at https://github.com/johnthagen/min-sized-rust
-
-[profile.release]
-strip = true # strip Symbols from Binary. Automatically strip symbols from the binary
-lto = true # Enable Link Time Optimization (LTO). Instructs the linker to optimize at the link stage
-codegen-units = 1 # Reduce Parallel Code Generation Units to Increase Optimization
-panic = "abort" # Abort on Panic
