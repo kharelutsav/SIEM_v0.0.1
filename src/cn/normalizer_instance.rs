@@ -43,7 +43,7 @@ impl Normalizer {
         }
     }
 
-    fn _add_taxonomy(&self, taxonomy_mapping: &HashMap<String, String>, parsed_log: JsonValue) -> JsonValue {
+    fn _add_taxonomy(&self, taxonomy_mapping: &HashMap<String, String>, parsed_log: &JsonValue) -> JsonValue {
         let mut normalized_log = object! {};
         for (key, value) in parsed_log.entries() {
             let mut taxonomy = key.to_lowercase();
@@ -55,7 +55,7 @@ impl Normalizer {
         normalized_log
     }
 
-    pub fn normalize(&self, str_log: JsonValue, id: &str) -> JsonValue {
+    pub fn normalize(&self, str_log: &JsonValue, id: &str) -> JsonValue {
         let tax_map = self.taxonomy_map.get(id).unwrap();
         let type_map = self.type_map.get(id).unwrap();
         let mut taxonomized_log = self._add_taxonomy(tax_map, str_log); 

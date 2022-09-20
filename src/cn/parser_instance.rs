@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use json::{JsonValue, object};
+use json::JsonValue;
 use regex::Regex;
 
 #[derive(Debug)]
@@ -11,23 +11,21 @@ pub struct Parser {
 
 impl Parser {
 
-    pub fn parse(&self, id: &str, log: &str) -> JsonValue {
-        let mut str_log = object! {};
+    pub fn parse(&self, id: &str, log: &str, str_log: &mut JsonValue){
         match self.log_type[id].as_str() {
             "JSON" => {
                 // let index = self.regex.find(log).unwrap();
                 // self._json_parser(&json::parse(&log[index.start()..index.end()]).unwrap(), &mut str_log, "");
                 let (_, log) = log.split_once("{").unwrap();
                 let (json_log, _) = log.rsplit_once("}").unwrap();
-                self._json_parser(&json::parse(&format!("{{{json_log}}}")).unwrap(), &mut str_log, "");
+                self._json_parser(&json::parse(&format!("{{{json_log}}}")).unwrap(), str_log, "");
             },
             "LEEF" => {
-                self._capture_regex_match(&mut str_log, id, log);
-                self._leef_parser(str_log.remove("attributes").to_string(), &mut str_log)
+                self._capture_regex_match(str_log, id, log);
+                self._leef_parser(str_log.remove("attributes").to_string(), str_log)
             },
             _ => todo!()
         }
-        str_log
     }
 
     fn _capture_regex_match (&self, obj: &mut JsonValue, id: &str, log: &str) {

@@ -3,6 +3,7 @@ mod repo;
 mod models;
 
 use cn::_instance;
+use json::object;
 use std::time::Instant;
 use repo::mongo_repo::Mongo;
 
@@ -17,15 +18,17 @@ async fn main() -> std::io::Result<()> {
     let _raw_logs = r#"Aug 16 06:44:32 10.255.231.54 3c76668474611520f20a249c797ed76d: [Tue Aug 16 06:44:31.312303 2022] [workflow:alert] [140755:139645092910848] ICX Engine raised event: {"eventUid":"77fb17103ded43b8a5a4c0f26352b9cd","tokens":{"date":1617111871312001,"eventType":"security","engineUid":"icxEngine","engineName":"ICX Engine","attackFamily":"File Inclusion","riskLevel":70,"riskLevelOWASP":7.0,"cwe":"CWE-98","severity":5,"resolveType":"Default Resolve","part":"Multiple","icxPolicyName":"ICX - Configuration CD33 (Prod) v3.35.0","icxPolicyUid":"74c8811217755edf658f89d968ce5593","icxRuleName":"Remote file include by Get Vars","icxRuleUid":"hhhha8b382ef37a66f0b620c39adbbba","matchingParts":[{"part":"Path","partValue":"/index.php","partValueOperator":"pattern","partValuePatternUid":"PhpUriPattern_00445","partValuePatternName":"Php URI","partValuePatternVersion":"00445","partValueMatch":".php"},{"part":"Var_GET","partKey":"view","partKeyOperator":"regexp","partKeyPattern":".*","partKeyMatch":"view","partValue":"http://www.google.com","partValueOperator":"pattern","partValuePatternUid":"RFIProprietaryPattern_00421","partValuePatternName":"Remote file include","partValuePatternVersion":"00421","partValueMatch":"http://www.google.com","attackFamily":"File Inclusion","riskLevel":70,"riskLevelOWASP":7.0,"cwe":"CWE-98"}],"reason":"ICX Engine: File Inclusion in Var_GET 'view'","securityExceptionConfigurationUids":["cc0dc59fd2d276531ec0613213e236d7"]}}"#;
     // let mut stdin = io::stdin().lines();
     let start_time = Instant::now();
+    let mut str_log = object! {};
     for _ in 0..10000 {
         let mut raw_logs = raw_logs.lines();
         while let Some(raw_log) = raw_logs
         .next()
         {
             if let Some(id) = _processor.pre_process(&raw_log) {
-                let mut str_log = _parser.parse(&id, &raw_log);
+                _parser.parse(&id, &raw_log, &mut str_log);
                 _processor.post_process(&id, &raw_log, &mut str_log);
-                let _normalized_log = _normalizer.normalize(str_log, &id);
+                let _normalized_log = _normalizer.normalize(&str_log, &id);
+                str_log.clear();
             }
         }
     }
