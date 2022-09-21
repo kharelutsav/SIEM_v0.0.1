@@ -4,7 +4,7 @@ mod models;
 
 use cn::_instance;
 use json::object;
-use std::time::Instant;
+use std::{time::Instant, collections::HashMap};
 use repo::mongo_repo::Mongo;
 
 #[tokio::main]
@@ -20,7 +20,8 @@ async fn main() -> std::io::Result<()> {
     let start_time = Instant::now();
     let mut str_log = object! {};
     let mut normalized_log = object! {};
-    let mut typemapper = json::object! {};
+    // let mut typemapper = json::object! {};
+    let mut typemapper = HashMap::new();
     for _ in 0..10000 {
         let mut raw_logs = raw_logs.lines();
         while let Some(raw_log) = raw_logs

@@ -8,40 +8,40 @@ pub struct Normalizer { // Matches the regex objects and returns the match
 }
 
 impl Normalizer { 
-    // fn _add_type(&self, taxonomized_log: &mut JsonValue, type_mapping: &HashMap<String, String>) {
-    //     let mut typemapper: HashMap<&str, Vec<&str>> = HashMap::new();
-    //     let xyz = taxonomized_log.clone();
-    //     for (field, _value) in xyz.entries() {
-    //         if let Some(data_type) = type_mapping.get(field) {
-    //             if let Some(value) = typemapper.get_mut(data_type.as_str()) {
-    //                 value.push(field)
-    //             }
-    //             else {
-    //                 typemapper.insert(data_type, vec![field]);
-    //             }
-    //         }
-    //     }
-    //     for (key, value) in typemapper {
-    //         taxonomized_log[key] = value.join(" ").as_str().into();
-    //     }
-    // }
-
-    pub fn _add_type(&self, taxonomized_log: &mut JsonValue, typemapper: &mut JsonValue,id: &str) {
+    pub fn _add_type(&self, taxonomized_log: &mut JsonValue, typemapper: &mut HashMap<String, Vec<String>>, id: &str) {
         let type_map = self.type_map.get(id).unwrap();
         for (field, _value) in taxonomized_log.entries() {
             if let Some(data_type) = type_map.get(field) {
-                if typemapper.has_key(&data_type) {
-                    let _ = typemapper[data_type].push(field);
+                if let Some(value) = typemapper.get_mut(data_type.as_str()) {
+                    value.push(field.to_string())
                 }
                 else {
-                    typemapper[data_type] = json::array![field];
+                    typemapper.insert(data_type.to_string(), vec![field.to_string()]);
                 }
             }
         }
-        for (key, value) in typemapper.entries() {
-            taxonomized_log.insert(&key, value.clone()).unwrap();
+        for (key, value) in typemapper {
+            let value: JsonValue = value.join(" ").into();
+            taxonomized_log.insert(key, value).unwrap();
         }
     }
+
+    // pub fn _add_type(&self, taxonomized_log: &mut JsonValue, typemapper: &mut JsonValue,id: &str) {
+    //     let type_map = self.type_map.get(id).unwrap();
+    //     for (field, _value) in taxonomized_log.entries() {
+    //         if let Some(data_type) = type_map.get(field) {
+    //             if typemapper.has_key(&data_type) {
+    //                 let _ = typemapper[data_type].push(field);
+    //             }
+    //             else {
+    //                 typemapper[data_type] = json::array![field];
+    //             }
+    //         }
+    //     }
+    //     for (key, value) in typemapper.entries() {
+    //         taxonomized_log.insert(&key, value.clone()).unwrap();
+    //     }
+    // }
 
     pub fn _add_taxonomy(&self, parsed_log: &JsonValue, id: &str, normalized_log: &mut JsonValue) {
         let tax_map = self.taxonomy_map.get(id).unwrap();
