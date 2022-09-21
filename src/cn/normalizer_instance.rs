@@ -39,7 +39,7 @@ impl Normalizer {
             }
         }
         for (key, value) in typemapper.entries() {
-            taxonomized_log[key] = value.clone();
+            taxonomized_log.insert(&key, value.clone()).unwrap();
         }
     }
 
@@ -50,7 +50,7 @@ impl Normalizer {
             if let Some(replace_str) = tax_map.get(&taxonomy) {
                 taxonomy = replace_str.to_string();
             }
-            normalized_log[taxonomy] = value.to_owned();
+            normalized_log.insert(&taxonomy, value.to_owned()).unwrap();
         }
     }
 }

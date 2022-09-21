@@ -54,18 +54,18 @@ impl Parser {
                     for index in 0..value.len() {
                         let obj = &value[index];
                         if obj.len() == 2 && obj.has_key("key") && obj.has_key("value") {
-                            str_log[format!("{key_}{key}_{}", obj["key"].to_string())] = obj["value"].to_owned();
+                            str_log.insert(&format!("{key_}{key}_{}", obj["key"].to_string()), obj["value"].to_owned()).unwrap();
                             continue;
                         }
                         self._json_parser(obj, str_log, &format!("{key_}{key}_{index}_"));
                     }
                 }
                 else {
-                    str_log[format!("{key_}{key}")] = value.members().map(|x| x.to_string()).collect:: <Vec<String>>().join(", ").into();
+                    str_log.insert(&format!("{key_}{key}"), value.members().map(|x| x.to_string()).collect:: <Vec<String>>().join(", ")).unwrap();
                 }
             }
             else {
-                str_log[format!("{key_}{key}")] = value.clone();
+                str_log.insert(&format!("{key_}{key}"), value.clone()).unwrap();
             } 
         }
     }
