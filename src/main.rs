@@ -7,6 +7,11 @@ use json::object;
 use std::{time::Instant, collections::HashMap};
 use repo::mongo_repo::Mongo;
 
+
+#[global_allocator]
+static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let db = Mongo::init().await;

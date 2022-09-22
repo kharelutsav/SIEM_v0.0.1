@@ -15,5 +15,6 @@ dotenv = "0.15.0"
 futures = "0.3.24"
 bson = "2.4.0"
 mongodb = "2.3.0"
+tikv-jemallocator = "0.4.0"
 
 # Build in Release Mode. Other optimization techniques at https://github.com/johnthagen/min-sized-rust
