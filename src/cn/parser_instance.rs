@@ -1,19 +1,21 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ffi::{CString, CStr}};
 use json::JsonValue;
+use libloading::Library;
 use regex::Regex;
 
 #[derive(Debug)]
 pub struct Parser {
     pub log_type: HashMap<String, String>,
     pub regex: Regex,
-    pub regex_objects: HashMap<String, Regex>
+    pub regex_objects: HashMap<String, Regex>,
+    pub library: HashMap<String, Library>
 }
 
 impl Parser {
 
     pub fn parse(&self, id: &str, log: &str, str_log: &mut JsonValue){
         match self.log_type[id].as_str() {
-            "JSON" => {
+            "CUSTOM" => {
                 // let index = self.regex.find(log).unwrap();
                 // self._json_parser(&json::parse(&log[index.start()..index.end()]).unwrap(), &mut str_log, "");
                 let (_, log) = log.split_once("{").unwrap();
@@ -23,6 +25,14 @@ impl Parser {
             "LEEF" => {
                 self._capture_regex_match(str_log, id, log);
                 self._leef_parser(str_log.remove("attributes").to_string(), str_log)
+            },
+            "JSON" => {
+                unsafe {
+                    let parser: libloading::Symbol<unsafe extern fn(name: *const i8) -> *const i8> = self.library.get("test").unwrap().get(b"parser").unwrap();
+                    let str = CString::new("Some Json Value").unwrap();
+                    let value = parser(str.as_ptr());
+                    str_log.clone_from(&json::parse(CStr::from_ptr(value).to_str().unwrap()).unwrap());
+                }
             },
             _ => todo!()
         }

@@ -11,7 +11,6 @@ use repo::mongo_repo::Mongo;
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let db = Mongo::init().await;
@@ -26,7 +25,7 @@ async fn main() -> std::io::Result<()> {
     let mut str_log = object! {};
     let mut normalized_log = object! {};
     let mut typemapper = HashMap::new();
-    for _ in 0..10000 {
+    for _ in 0..1 {
         let mut raw_logs = raw_logs.lines();
         while let Some(raw_log) = raw_logs
         .next()
@@ -36,6 +35,7 @@ async fn main() -> std::io::Result<()> {
                 _processor.post_process(&id, &raw_log, &mut str_log);
                 _normalizer._add_taxonomy(&str_log, &id, &mut normalized_log);
                 _normalizer._add_type(&mut normalized_log, &mut typemapper, &id);
+                println!("{:#}", normalized_log);
                 str_log.clear();
                 normalized_log.clear();
                 typemapper.clear();
