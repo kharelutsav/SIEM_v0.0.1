@@ -15,7 +15,10 @@ dotenv = "0.15.0"
 futures = "0.3.24"
 bson = "2.4.0"
 mongodb = "2.3.0"
-tikv-jemallocator = "0.4.0"
 libloading = "0.7.3"
+dylib = "0.0.2"
+
+[target.'cfg(not(target_env = "mvsc"))'.dependencies]
+tikv-jemallocator = "0.5.0"
 
 # Build in Release Mode. Other optimization techniques at https://github.com/johnthagen/min-sized-rust

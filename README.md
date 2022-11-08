@@ -5,3 +5,8 @@ codegen-units = 1 # Reduce Parallel Code Generation Units to Increase Optimizati
 panic = "abort" # Abort on Panic
 
 RUSTFLAGS="-C target-cpu=native" cargo build --release
+
+MALLOC_CHECK_=1 ./target/release/leef
+valgrind --tool=memcheck --leak-check=full ./target/release/leef 
+valgrind --tool=memcheck ./target/release/leef
+valgrind ./target/release/leef

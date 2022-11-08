@@ -2,14 +2,10 @@ mod cn;
 mod repo;
 mod models;
 
-use cn::_instance;
 use json::object;
-use std::{time::Instant, collections::HashMap};
+use cn::_instance;
 use repo::mongo_repo::Mongo;
-
-
-#[global_allocator]
-static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+use std::{time::Instant, collections::HashMap};
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -25,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     let mut str_log = object! {};
     let mut normalized_log = object! {};
     let mut typemapper = HashMap::new();
-    for _ in 0..1 {
+    for _ in 0..10000 {
         let mut raw_logs = raw_logs.lines();
         while let Some(raw_log) = raw_logs
         .next()
@@ -33,9 +29,8 @@ async fn main() -> std::io::Result<()> {
             if let Some(id) = _processor.pre_process(&raw_log) {
                 _parser.parse(&id, &raw_log, &mut str_log);
                 _processor.post_process(&id, &raw_log, &mut str_log);
-                _normalizer._add_taxonomy(&str_log, &id, &mut normalized_log);
-                _normalizer._add_type(&mut normalized_log, &mut typemapper, &id);
-                println!("{:#}", normalized_log);
+                _normalizer._add_taxonomy_then_type(&str_log, &id, &mut normalized_log, &mut typemapper);
+                // println!("{:#}", normalized_log);
                 str_log.clear();
                 normalized_log.clear();
                 typemapper.clear();
