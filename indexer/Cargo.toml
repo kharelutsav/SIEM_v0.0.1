@@ -1,0 +1,12 @@
+[package]
+name = "indexing"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+mimalloc = { version = "0.1.32", default-features = false }
+tokio = {version = "1.22.0", features = ["net", "rt", "macros"]}
+tokio-tungstenite = "0.17.2"
+futures-util = "0.3.25"

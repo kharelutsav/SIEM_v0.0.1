@@ -2,21 +2,20 @@ mod cn;
 mod repo;
 mod models;
 
-use futures::SinkExt;
 use json::object;
 use cn::_instance;
+use futures::SinkExt;
 use repo::mongo_repo::Mongo;
 use futures_util::StreamExt;
-use tokio::{net::TcpListener, io::AsyncReadExt};
 use tokio_tungstenite::tungstenite::Message;
 use std::{time::Instant, collections::HashMap};
+use tokio::{net::TcpListener, io::AsyncReadExt};
 
 #[allow(unused_must_use)]
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let db = Mongo::init().await;
     let (_processor, _parser, _normalizer) = _instance::init(db).await;
-    // let _raw_logs = r#""#;
     let listener = TcpListener::bind("127.0.0.1:5500")
                 .await
                 .expect("Listening to TCP failed.");
