@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ffi::{CString, CStr}};
+use std::{collections::HashMap, ffi::CString, os::raw::c_char};
 use json::JsonValue;
 use libloading::Library;
 use regex::Regex;
@@ -15,7 +15,7 @@ impl Parser {
 
     pub fn parse(&self, id: &str, log: &str, str_log: &mut JsonValue){
         match self.log_type[id].as_str() {
-            "CUSTOM" => {
+            "_JSON" => {
                 // let index = self.regex.find(log).unwrap();
                 // self._json_parser(&json::parse(&log[index.start()..index.end()]).unwrap(), &mut str_log, "");
                 let (_, log) = log.split_once("{").unwrap();
@@ -28,10 +28,11 @@ impl Parser {
             },
             "JSON" => {
                 unsafe {
-                    let parser: libloading::Symbol<unsafe extern fn(name: *const i8) -> *const i8> = self.library.get("test").unwrap().get(b"parser").unwrap();
-                    let str = CString::new("Some Json Value").unwrap();
+                    let parser: libloading::Symbol<unsafe fn(name: *const c_char) -> *mut JsonValue> = self.library.get(id).unwrap().get(b"parser").unwrap();
+                    let str = CString::new(log).unwrap();
                     let value = parser(str.as_ptr());
-                    str_log.clone_from(&json::parse(CStr::from_ptr(value).to_str().unwrap()).unwrap());
+                    let p = Box::from_raw(value);
+                    str_log.clone_from(&p);
                 }
             },
             _ => todo!()
