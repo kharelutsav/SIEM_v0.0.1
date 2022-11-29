@@ -1,0 +1,21 @@
+[package]
+name = "rust_analyzer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1.6"
+json = "0.12.4"
+serde_json = "1.0.85"
+serde = "1.0.144"
+actix-web = "4"
+dotenv = "0.15.0"
+futures = "0.3"
+bson = "2.4.0"
+
+[dependencies.mongodb]
+version = "2.2.0"
+default-features = false
+features = ["async-std-runtime"]
